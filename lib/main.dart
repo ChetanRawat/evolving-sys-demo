@@ -76,6 +76,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                           border: Border.all(
+                            color: _selectedPosition == 0?Colors.grey:Colors.black,
                               width: 1
                           )
                       ),
@@ -96,6 +97,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: Container(
                       decoration: BoxDecoration(
                           shape: BoxShape.circle,
+                          color: _selectedPosition == _noOfElements-1?Colors.grey:Colors.black,
                           border: Border.all(
                               width: 1
                           )
