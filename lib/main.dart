@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
+import 'custommultichildlayout.dart';
+
 void main() {
-  runApp(const MyApp());
+  runApp(const MyApp()/*CustomMultiChildLayoutApp()*/);
 }
 
 class MyApp extends StatelessWidget {
@@ -32,12 +34,22 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _selectedPosition = 0;
-  int _noOfElements = 5;
+  int currentNo = 1;
+  late int maxElements;
+
+  List<int> _numbers = [1, 2,3,4,5,6,7,8,9,10,11,12,13,14,15,16];
+  // List<String> displayString =
 
   void _incrementPosition() {
     setState(() {
-      if(_selectedPosition < _noOfElements-1)
-      _selectedPosition++;
+      if(_selectedPosition < maxElements-1){
+        _selectedPosition++;
+      }
+
+      if(currentNo < _numbers.length){
+          currentNo++;
+      }
+
     });
   }
 
@@ -67,6 +79,7 @@ class _MyHomePageState extends State<MyHomePage> {
               height: 48,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.max,
                 children: [
                   InkWell(
                     onTap: (){
@@ -86,9 +99,10 @@ class _MyHomePageState extends State<MyHomePage> {
                       child: Icon(Icons.arrow_back),
                     ),
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: buildCenterList(),
+                  Container(
+                    child: Wrap(
+                      children: buildCenterList(MediaQuery.of(context).size.width - 80),
+                    ),
                   ),
                   InkWell(
                     onTap: (){
@@ -97,8 +111,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: Container(
                       decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: _selectedPosition == _noOfElements-1?Colors.grey:Colors.black,
                           border: Border.all(
+                            color: _selectedPosition == _numbers.length -1?Colors.grey:Colors.black,
                               width: 1
                           )
                       ),
@@ -113,13 +127,20 @@ class _MyHomePageState extends State<MyHomePage> {
             )
           ],
         ),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ),// This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 
-  List<Widget> buildCenterList() {
+  List<Widget> buildCenterList(double maxwidth) {
+    double elementWidth  = 40;
+    maxElements = maxwidth~/elementWidth;
+
+    if(_numbers.length <= maxElements){
+      maxElements = _numbers.length;
+    }
+
     List<Widget> list = List.empty(growable: true);
-    for(int i = 0;i<_noOfElements;i++){
+    for(int i = 0;i<maxElements;i++){
       list.add(Container(
         decoration: BoxDecoration(
             shape: BoxShape.circle,
@@ -131,9 +152,39 @@ class _MyHomePageState extends State<MyHomePage> {
         width: 32,
         height: 32,
         margin: EdgeInsets.symmetric(horizontal: 4),
-        child: Center(child: Text("${i+1}")),
+        child: Center(child: Text(determineDisplaytext(maxElements,_selectedPosition,i))),
       ));
     }
     return list;
+  }
+
+  String determineDisplaytext(int maxElements, int selectedPos,int position) {
+    String value = "";
+
+    if(_numbers.length <= maxElements || position == 0 ){
+      value = "${_numbers.elementAt(position)}";
+    }else if(position == maxElements - 1){
+      value = "${_numbers.length}";
+    }else{
+      // value = "na";
+
+      if(!canFitRight(maxElements, selectedPos) && position == maxElements - 2){
+          value = "...";
+      }else if(selectedPos == maxElements-3 && canFitRight(maxElements, selectedPos)){
+          value = "${_numbers.elementAt(position)}";
+      }else{
+        value = "${_numbers.elementAt(position)}";
+      }
+
+    }
+
+
+    return value;
+  }
+
+  bool canFitRight(int maxElements , int selectedPos){
+    int rightAvailableSpaces =  maxElements - selectedPos + 1;
+    int remainingElements = _numbers.length - (selectedPos+1);
+    return rightAvailableSpaces == remainingElements;
   }
 }
