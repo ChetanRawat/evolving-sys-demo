@@ -1,3 +1,4 @@
+import 'package:evolving_sys_demo/pagination/pagination.dart';
 import 'package:flutter/material.dart';
 
 import 'custommultichildlayout.dart';
@@ -18,7 +19,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: Scaffold(body: NumbersPage())/*const MyHomePage(title: 'Flutter Demo Home Page')*/,
     );
   }
 }
@@ -34,21 +35,24 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _selectedPosition = 0;
-  int currentNo = 1;
-  late int maxElements;
+  late int noOfSpots;
 
   List<int> _numbers = [1, 2,3,4,5,6,7,8,9,10,11,12,13,14,15,16];
   // List<String> displayString =
 
+  int currentPage = 1;
+
   void _incrementPosition() {
     setState(() {
-      if(_selectedPosition < maxElements-1){
+
+      if(_selectedPosition < _numbers.length){
+        // currentPage++;
         _selectedPosition++;
       }
 
-      if(currentNo < _numbers.length){
-          currentNo++;
-      }
+      // if(_selectedPosition < maxElements-1 && (canFitRight(maxElements, _selectedPosition) || _selectedPosition== maxElements -3)){
+      //   _selectedPosition++;
+      // }
 
     });
   }
@@ -57,6 +61,9 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       if(_selectedPosition > 0)
       _selectedPosition--;
+
+      if(currentPage > 0)
+        currentPage--;
     });
   }
 
@@ -102,17 +109,16 @@ class _MyHomePageState extends State<MyHomePage> {
                   Container(
                     child: Wrap(
                       children: buildCenterList(MediaQuery.of(context).size.width - 80),
-                    ),
-                  ),
+                    ),),
                   InkWell(
                     onTap: (){
                       _incrementPosition();
                     },
-                    child: Container(
+                    child:Container(
                       decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: _selectedPosition == _numbers.length -1?Colors.grey:Colors.black,
+                              color: _selectedPosition == _numbers.length -1?Colors.grey:Colors.black,
                               width: 1
                           )
                       ),
@@ -133,14 +139,14 @@ class _MyHomePageState extends State<MyHomePage> {
 
   List<Widget> buildCenterList(double maxwidth) {
     double elementWidth  = 40;
-    maxElements = maxwidth~/elementWidth;
+    noOfSpots = maxwidth~/elementWidth;
 
-    if(_numbers.length <= maxElements){
-      maxElements = _numbers.length;
+    if(_numbers.length <= noOfSpots){
+      noOfSpots = _numbers.length;
     }
 
     List<Widget> list = List.empty(growable: true);
-    for(int i = 0;i<maxElements;i++){
+    for(int i = 0;i<noOfSpots;i++){
       list.add(Container(
         decoration: BoxDecoration(
             shape: BoxShape.circle,
@@ -152,25 +158,25 @@ class _MyHomePageState extends State<MyHomePage> {
         width: 32,
         height: 32,
         margin: EdgeInsets.symmetric(horizontal: 4),
-        child: Center(child: Text(determineDisplaytext(maxElements,_selectedPosition,i))),
+        child: Center(child: Text(determineDisplaytext(noOfSpots,_selectedPosition,i))),
       ));
     }
     return list;
   }
 
-  String determineDisplaytext(int maxElements, int selectedPos,int position) {
+  String determineDisplaytext(int noOfSpots, int selectedPos,int position) {
     String value = "";
 
-    if(_numbers.length <= maxElements || position == 0 ){
+    if(_numbers.length <= noOfSpots || position == 0 ){ //always display first element
       value = "${_numbers.elementAt(position)}";
-    }else if(position == maxElements - 1){
+    }else if(position == noOfSpots - 1){
       value = "${_numbers.length}";
     }else{
       // value = "na";
 
-      if(!canFitRight(maxElements, selectedPos) && position == maxElements - 2){
+      if(!canFitRight(noOfSpots, selectedPos) && position == noOfSpots - 2){
           value = "...";
-      }else if(selectedPos == maxElements-3 && canFitRight(maxElements, selectedPos)){
+      }else if(selectedPos == noOfSpots-3 && canFitRight(noOfSpots, selectedPos)){
           value = "${_numbers.elementAt(position)}";
       }else{
         value = "${_numbers.elementAt(position)}";
@@ -182,9 +188,15 @@ class _MyHomePageState extends State<MyHomePage> {
     return value;
   }
 
-  bool canFitRight(int maxElements , int selectedPos){
-    int rightAvailableSpaces =  maxElements - selectedPos + 1;
-    int remainingElements = _numbers.length - (selectedPos+1);
-    return rightAvailableSpaces == remainingElements;
+  bool canFitRight(int noOfSpots , int selectedPos){
+    int remainingSpotsToRight =  noOfSpots - selectedPos + 1;
+    int remainingElementsRight = _numbers.length - currentPage;
+    return remainingSpotsToRight == remainingElementsRight;
+  }
+
+  bool canFitLeft(int noOfSpots , int selectedPos){
+    int remainingSpotsToLeft =  selectedPos;
+    int remainingElementsLeft = currentPage -1;
+    return remainingSpotsToLeft == remainingElementsLeft;
   }
 }
